@@ -6,24 +6,25 @@
 (defn- strike? [rolls]
   (= 10 (first rolls)))
 
-(defn- drop-frame [remaining-rolls]
-  (if (strike? remaining-rolls)
-    (drop 1 remaining-rolls)
-    (drop 2 remaining-rolls)))
+(defn- frame-dropper [rolls]
+  (if (strike? rolls)
+    (rest rolls)
+    (drop 2 rolls)))
 
-(defn- score-frame [result remaining-rolls]
-  (let [roll1 (first remaining-rolls) roll2 (second remaining-rolls)]
-    (if (or (strike? remaining-rolls) (spare? remaining-rolls))
-      (conj result (+ roll1 roll2 (nth remaining-rolls 2)))
-      (conj result (+ roll1 roll2)))))
+(defn- frame-scorer [result rolls]
+  (if (or (strike? rolls) (spare? rolls))
+    (conj result (+ (first rolls) (second rolls) (nth rolls 2)))
+    (conj result (+ (first rolls) (second rolls)))))
 
 (defn- frames [rolls]
-  (loop [iteration 0, remaining-rolls rolls, result []]
+  (loop [iteration 0
+         rolls rolls
+         result []]
     (if (= 10 iteration)
       result
       (recur (inc iteration)
-             (drop-frame remaining-rolls)
-             (score-frame result remaining-rolls)))))
+             (frame-dropper rolls)
+             (frame-scorer result rolls)))))
 
 (defn score [rolls]
   (reduce + (frames rolls)))
